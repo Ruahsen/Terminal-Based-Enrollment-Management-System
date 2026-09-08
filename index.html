@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>ENROLL.EXE — Enrollment Management System</title>
+</head>
+
+<body>
+    <style>
+        :root {
+            --bg: #04120a;
+            --panel: #031007;
+            --fg: #39ff6a;
+            --dim: #1c7a3a;
+            --amber: #ffb000;
+            --cyan: #4dd8ff;
+            --red: #ff5c5c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: "Courier New", ui-monospace, Menlo, Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.45;
+            padding: 16px;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .20) 0 1px, transparent 1px 3px);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .5) 100%);
+        }
+
+        ::selection {
+            background: var(--fg);
+            color: #000
+        }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1
+        }
+
+        /* ASCII frames */
+        .frame {
+            position: relative;
+            border: 1px solid var(--dim);
+            background: var(--panel);
+            padding: 16px 18px;
+            margin: 14px 0
+        }
+
+        .frame>i {
+            position: absolute;
+            font-style: normal;
+            color: var(--fg);
+            background: var(--bg);
+            padding: 0 2px;
+            line-height: 1;
+            font-size: 13px
+        }
+
+        .frame>i.tl {
+            top: -8px;
+            left: -5px
+        }
+
+        .frame>i.tr {
+            top: -8px;
+            right: -5px
+        }
+
+        .frame>i.bl {
+            bottom: -8px;
+            left: -5px
+        }
+
+        .frame>i.br {
+            bottom: -8px;
+            right: -5px
+        }
+
+        .frame .ttl {
+            position: absolute;
+            top: -9px;
+            left: 14px;
+            background: var(--bg);
+            padding: 0 8px;
+            color: var(--amber);
+            letter-spacing: 2px;
+            font-size: 12px
+        }
+
+        /* header */
+        .logo {
+            white-space: pre;
+            color: var(--fg);
+            text-shadow: 0 0 8px rgba(57, 255, 106, .55);
+            font-size: 11px;
+            line-height: 1.15;
+            overflow-x: auto
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px
+        }
+
+        .sysline {
+            color: var(--dim)
+        }
+
+        .clock {
+            color: var(--cyan);
+            font-size: 12px
+        }
+
+        /* nav + buttons */
+        nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 14px 0 2px
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--dim);
+            color: var(--fg);
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 5px 12px;
+            letter-spacing: 1px;
+        }
+
+        button::before {
+            content: "[ "
+        }
+
+        button::after {
+            content: " ]"
+        }
+
+        button:hover {
+            border-color: var(--fg);
+            background: rgba(57, 255, 106, .08)
+        }
+
+        button.active {
+            border-color: var(--amber);
+            color: var(--amber);
+            box-shadow: inset 0 0 10px rgba(255, 176, 0, .22)
+        }
+
+        .btn-red {
+            border-color: #7a2b2b;
+            color: var(--red)
+        }
+
+        .btn-red:hover {
+            border-color: var(--red);
+            background: rgba(255, 92, 92, .08)
+        }
+
+        .btn-amber {
+            border-color: #7a5a1c;
+            color: var(--amber)
+        }
+
+        .btn-amber:hover {
+            border-color: var(--amber);
+            background: rgba(255, 176, 0, .08)
+        }
+
+        /* forms */
+        input,
+        select {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--dim);
+            color: var(--fg);
+            font: inherit;
+            font-size: 13px;
+            padding: 3px 4px;
+            outline: none;
+            min-width: 180px;
+        }
+
+        input:focus,
+        select:focus {
+            border-bottom-style: solid;
+            border-bottom-color: var(--fg)
+        }
+
+        select option {
+            background: #031007;
+            color: var(--fg)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px
+        }
+
+        .manage {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap
+        }
+
+        .term-form {
+            margin-top: 14px;
+            border-top: 1px dashed var(--dim);
+            padding-top: 12px
+        }
+
+        .frow {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            margin: 8px 0;
+            flex-wrap: wrap
+        }
+
+        .frow label {
+            color: var(--amber);
+            min-width: 130px;
+            font-size: 12.5px
+        }
+
+        .frow label+span {
+            color: var(--dim)
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px
+        }
+
+        /* tables & charts */
+        .tbl,
+        .chart {
+            overflow-x: auto;
+            color: var(--fg);
+            text-shadow: 0 0 4px rgba(57, 255, 106, .30);
+            font-size: 12.5px;
+            line-height: 1.4;
+            margin: 0
+        }
+
+        /* dashboard */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px
+        }
+
+        .stat-label {
+            color: var(--dim);
+            letter-spacing: 2px;
+            font-size: 10.5px
+        }
+
+        .stat-val {
+            font-size: 32px;
+            color: var(--fg);
+            text-shadow: 0 0 10px rgba(57, 255, 106, .5);
+            margin: 4px 0 2px
+        }
+
+        .stat-sub {
+            color: var(--dim);
+            font-size: 11px;
+            white-space: pre
+        }
+
+        /* modal */
+        .hidden {
+            display: none !important
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px
+        }
+
+        .modal-box {
+            width: min(500px, 94vw);
+            background: var(--panel)
+        }
+
+        /* log + cli */
+        .log {
+            max-height: 190px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: var(--fg);
+            font-size: 12.5px
+        }
+
+        .cli {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px dashed var(--dim);
+            margin-top: 10px;
+            padding-top: 10px
+        }
+
+        .prompt {
+            color: var(--amber);
+            white-space: nowrap
+        }
+
+        .cli input {
+            flex: 1;
+            border-bottom: none;
+            min-width: 0
+        }
+
+        #toast {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 2000;
+            pointer-events: none
+        }
+
+        .toastmsg {
+            border: 1px solid var(--fg);
+            background: #031007;
+            padding: 8px 14px;
+            margin-top: 8px;
+            box-shadow: 0 0 14px rgba(57, 255, 106, .35);
+            animation: pop .18s ease-out;
+            transition: opacity .3s
+        }
+
+        @keyframes pop {
+            from {
+                transform: translateY(8px);
+                opacity: 0
+            }
+        }
+
+        footer {
+            margin: 16px 0 6px;
+            text-align: center;
+            font-size: 11.5px;
+            color: var(--dim)
+        }
+
+        .blink {
+            animation: blink 1s steps(1) infinite
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+    </style>
+
+    <div class="wrap">
+        <header>
+            <pre class="logo">███████╗███╗   ███╗███████╗
+██╔════╝████╗ ████║██╔════╝
+█████╗  ██╔████╔██║███████╗
+██╔══╝  ██║╚██╔╝██║╚════██║
+███████╗██║ ╚═╝ ██║███████║
+╚══════╝╚═╝     ╚═╝╚══════╝</pre>
+            <div class="topbar">
+                <div class="sysline">ENROLLMENT MANAGEMENT SYSTEM v2.4 </div>
+                <div class="clock" id="clock"></div>
+            </div>
+        </header>
+
+        <nav id="nav">
+            <button data-view="dashboard" class="active">1·DASHBOARD</button>
+            <button data-view="students">2·STUDENTS</button>
+            <button data-view="courses">3·COURSES</button>
+            <button data-view="enroll">4·ENROLL</button>
+            <button data-view="reports">5·REPORTS</button>
+        </nav>
+
+        <main id="main"></main>
+
+        <section class="frame">
+            <i class="tl">┌</i><i class="tr">┐</i><i class="bl">└</i><i class="br">┘</i>
+            <span class="ttl">SYSTEM LOG</span>
+            <div id="log" class="log"></div>
+            <div class="cli">
+                <span class="prompt">root@enroll:~$</span>
+                <input id="cli" autocomplete="off" spellcheck="false" placeholder="type 'help' + ENTER">
+                <span class="blink sysline">▊</span>
+            </div>
+        </section>
+
+        <footer>[1-5] SWITCH MODULE&nbsp;&nbsp;[/] FOCUS CONSOLE&nbsp;&nbsp;[ESC] CLOSE
+            WINDOW&nbsp;&nbsp;::&nbsp;LOCAL-STORAGE PERSISTENCE ENABLED</footer>
+    </div>
+
+    <div id="modal" class="modal hidden">
+        <div class="frame modal-box">
+            <i class="tl">┌</i><i class="tr">┐</i><i class="bl">└</i><i class="br">┘</i>
+            <span class="ttl" id="modal-title">EDIT</span>
+            <div id="modal-body"></div>
+            <div class="row-actions">
+                <button class="btn" id="modal-save">SAVE</button>
+                <button class="btn btn-red" id="modal-cancel">CANCEL</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+        "use strict";
+        /* ================= UTIL ================= */
+        var $ = function (s) { return document.querySelector(s); };
+        var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+        function pad(s, n) { s = String(s == null ? "" : s); return s.length > n ? s.slice(0, n - 1) + "~" : s.padEnd(n, " "); }
+        function today() { return new Date().toISOString().slice(0, 10); }
+        function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+
+        function asciiTable(headers, rows, widths) {
+            function edge(l, m, r) { return l + widths.map(function (w) { return "─".repeat(w + 2); }).join(m) + r; }
+            function fmt(vals) { return "│ " + vals.map(function (v, i) { return pad(v, widths[i]); }).join(" │ ") + " │"; }
+            var out = [edge("┌", "┬", "┐"), fmt(headers), edge("├", "┼", "┤")];
+            rows.forEach(function (r) { out.push(fmt(r)); });
+            out.push(edge("└", "┴", "┘"));
+            return out.join("\n");
+        }
+        function bar(n, max, width) {
+            width = width || 28;
+            var f = max ? Math.round(n / max * width) : 0;
+            return "█".repeat(f) + "░".repeat(width - f);
+        }
+
+        /* ================= DATA LAYER ================= */
+        var DB_KEY = "enroll_ascii_db_v1";
+        var PROGRAMS = ["Computer Science", "Mathematics", "Physics", "Economics", "Biology", "Engineering"];
+        var db = null;
+
+        function seed() {
+            var students = [
+                ["S-1001", "Ada Lovelace", "ada@uni.edu", "Computer Science", 2],
+                ["S-1002", "Alan Turing", "alan@uni.edu", "Computer Science", 3],
+                ["S-1003", "Grace Hopper", "grace@uni.edu", "Computer Science", 4],
+                ["S-1004", "Mary Jackson", "mary@uni.edu", "Mathematics", 2],
+                ["S-1005", "Katherine Johnson", "kat@uni.edu", "Mathematics", 3],
+                ["S-1006", "Nikola Tesla", "niko@uni.edu", "Physics", 1],
+                ["S-1007", "Marie Curie", "marie@uni.edu", "Physics", 4],
+                ["S-1008", "John von Neumann", "john@uni.edu", "Economics", 2]
+            ].map(function (a) { return { id: a[0], name: a[1], email: a[2], program: a[3], year: a[4], status: "active", joined: "2026-08-20" }; });
+            var courses = [
+                { code: "CS101", title: "Intro to Programming", credits: 4, cap: 30, instructor: "D. Knuth" },
+                { code: "CS202", title: "Data Structures", credits: 4, cap: 25, instructor: "A. Tanenbaum" },
+                { code: "MA110", title: "Linear Algebra", credits: 3, cap: 40, instructor: "G. Strang" },
+                { code: "PH220", title: "Quantum Mechanics", credits: 4, cap: 20, instructor: "R. Feynman" },
+                { code: "EC105", title: "Microeconomics", credits: 3, cap: 35, instructor: "M. Friedman" }
+            ];
+            var enrollments = [
+                ["S-1001", "CS101", "2026-09-01", "ENROLLED", "-"],
+                ["S-1002", "CS101", "2026-09-01", "ENROLLED", "-"],
+                ["S-1002", "CS202", "2026-09-02", "ENROLLED", "-"],
+                ["S-1003", "CS202", "2026-09-02", "COMPLETED", "A"],
+                ["S-1004", "MA110", "2026-09-03", "ENROLLED", "-"],
+                ["S-1005", "MA110", "2026-09-03", "ENROLLED", "-"],
+                ["S-1006", "PH220", "2026-09-04", "ENROLLED", "-"],
+                ["S-1007", "PH220", "2026-09-04", "ENROLLED", "-"],
+                ["S-1008", "EC105", "2026-09-05", "ENROLLED", "-"],
+                ["S-1001", "MA110", "2026-09-06", "ENROLLED", "-"]
+            ].map(function (a, i) { return { id: i + 1, studentId: a[0], courseCode: a[1], date: a[2], status: a[3], grade: a[4] }; });
+            return { students: students, courses: courses, enrollments: enrollments, seq: { s: 1009, e: 11 } };
+        }
+        function load() {
+            try { db = JSON.parse(localStorage.getItem(DB_KEY)); } catch (e) { db = null; }
+            if (!db || !db.students) db = seed();
+            if (!db.seq) db.seq = { s: 1009, e: db.enrollments.length + 1 };
+        }
+        function save() { try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) { log("WARN: storage unavailable -- session only", "warn"); } }
+
+        function sName(id) { var s = db.students.find(function (x) { return x.id === id; }); return s ? s.name : "?"; }
+        function cTitle(c) { var x = db.courses.find(function (k) { return k.code === c; }); return x ? x.title : "?"; }
+        function enrolledCount(code) { return db.enrollments.filter(function (e) { return e.courseCode === code && e.status === "ENROLLED"; }).length; }
+
+        /* ================= LOG / TOAST / ARM ================= */
+        function log(msg, type) {
+            var colors = { ok: "var(--fg)", err: "var(--red)", info: "var(--cyan)", warn: "var(--amber)" };
+            var el = $("#log");
+            var d = document.createElement("div");
+            d.innerHTML = '<span style="color:var(--dim)">[' + new Date().toLocaleTimeString() + ']</span> <span style="color:' + (colors[type] || colors.ok) + '">' + esc(msg) + "</span>";
+            el.appendChild(d);
+            while (el.children.length > 80) { el.removeChild(el.firstChild); }
+            el.scrollTop = el.scrollHeight;
+        }
+        function toast(msg, type) {
+            var colors = { ok: "var(--fg)", err: "var(--red)", warn: "var(--amber)", info: "var(--cyan)" };
+            var t = document.createElement("div");
+            t.className = "toastmsg";
+            t.style.borderColor = colors[type] || colors.ok;
+            t.style.color = colors[type] || colors.ok;
+            t.textContent = "> " + msg;
+            $("#toast").appendChild(t);
+            setTimeout(function () { t.style.opacity = "0"; setTimeout(function () { t.remove(); }, 320); }, 2200);
+        }
+        function arm(btn, fn) {
+            if (btn.dataset.armed === "1") { btn.dataset.armed = ""; btn.textContent = btn.dataset.label; fn(); return; }
+            btn.dataset.label = btn.textContent; btn.dataset.armed = "1"; btn.textContent = "[ SURE? ]";
+            setTimeout(function () { if (btn.dataset.armed === "1") { btn.dataset.armed = ""; btn.textContent = btn.dataset.label; } }, 2500);
+        }
+
+        /* ================= MODAL ================= */
+        var modalSave = null;
+        function openModal(title, fields, values, onSave) {
+            $("#modal-title").textContent = title;
+            $("#modal-body").innerHTML = fields.map(function (f) {
+                var v = esc(values[f.name] == null ? "" : values[f.name]);
+                var inp;
+                if (f.type === "select") {
+                    inp = '<select name="' + f.name + '">' + f.options.map(function (o) {
+                        return '<option value="' + esc(o) + '"' + (String(o) === String(values[f.name]) ? " selected" : "") + ">" + esc(o) + "</option>";
+                    }).join("") + "</select>";
+                } else {
+                    inp = '<input name="' + f.name + '" type="' + (f.type || "text") + '" value="' + v + '">';
+                }
+                return '<div class="frow"><label>&gt; ' + f.label + "</label>" + inp + "</div>";
+            }).join("");
+            modalSave = onSave;
+            $("#modal").classList.remove("hidden");
+        }
+
+        /* ================= VIEWS ================= */
+        function statCard(label, val, sub) {
+            return '<div class="frame stat"><i class="tl">┌</i><i class="tr">┐</i><i class="bl">└</i><i class="br">┘</i>' +
+                '<div class="stat-label">' + label + '</div><div class="stat-val">' + val + '</div><div class="stat-sub">' + sub + "</div></div>";
+        }
+        function corners() { return '<i class="tl">┌</i><i class="tr">┐</i><i class="bl">└</i><i class="br">┘</i>'; }
+
+        function viewDashboard() {
+            var totalS = db.students.length;
+            var totalC = db.courses.length;
+            var act = db.enrollments.filter(function (e) { return e.status === "ENROLLED"; }).length;
+            var capTotal = db.courses.reduce(function (a, c) { return a + c.cap; }, 0);
+            var pct = capTotal ? Math.round(act / capTotal * 100) : 0;
+            var recent = db.enrollments.slice().sort(function (a, b) { return b.id - a.id; }).slice(0, 6)
+                .map(function (e) { return ["E-" + String(e.id).padStart(3, "0"), e.studentId, pad(sName(e.studentId), 18), e.courseCode, e.date, e.status]; });
+            var maxE = Math.max.apply(null, [1].concat(db.courses.map(function (c) { return enrolledCount(c.code); })));
+            var chart = db.courses.map(function (c) {
+                var n = enrolledCount(c.code);
+                var flag = n >= c.cap ? "  [FULL]" : (n / c.cap >= 0.9 ? "  [WARN]" : "");
+                return pad(c.code, 7) + "│" + bar(n, maxE) + " " + String(n).padStart(2) + "/" + c.cap + flag;
+            }).join("\n");
+            return '<div class="stat-grid">' +
+                statCard("TOTAL STUDENTS", totalS, "┌─ registered accounts") +
+                statCard("COURSES OFFERED", totalC, "├─ active catalog") +
+                statCard("ACTIVE ENROLLMENTS", act, "├─ this semester") +
+                statCard("SEATS FILLED", pct + "%", "└─ capacity utilized") +
+                '</div>' +
+                '<div class="frame">' + corners() + '<span class="ttl">ENROLLMENT PER COURSE</span>' +
+                '<pre class="chart">' + chart + '</pre></div>' +
+                '<div class="frame">' + corners() + '<span class="ttl">RECENT ACTIVITY</span>' +
+                '<pre class="tbl">' + asciiTable(["REF", "STUDENT-ID", "STUDENT", "COURSE", "DATE", "STATUS"], recent, [6, 11, 18, 9, 11, 11]) + '</pre></div>';
+        }
+
+        function viewStudents() {
+            var q = state.q.toLowerCase();
+            var list = db.students.filter(function (s) {
+                return !q || [s.id, s.name, s.email, s.program, String(s.year), s.status].join(" ").toLowerCase().indexOf(q) > -1;
+            });
+            var rows = list.map(function (s) { return [s.id, s.name, s.email, s.program, "Y" + s.year, s.status.toUpperCase()]; });
+            var opts = db.students.map(function (s) { return '<option value="' + s.id + '">' + s.id + " · " + esc(s.name) + "</option>"; }).join("");
+            return '<div class="frame">' + corners() + '<span class="ttl">STUDENTS REGISTRY</span>' +
+                '<div class="toolbar">' +
+                '<label>&gt; SEARCH: <input id="q" value="' + esc(state.q) + '" placeholder="name / id / program"></label>' +
+                '<span class="sysline">[' + list.length + "/" + db.students.length + ' records]</span>' +
+                '<button class="btn" id="add-student">+ NEW STUDENT</button>' +
+                '</div>' +
+                '<pre class="tbl">' + asciiTable(["ID", "NAME", "EMAIL", "PROGRAM", "YR", "STATUS"], rows, [8, 22, 28, 20, 3, 9]) + '</pre>' +
+                '<div class="manage">' +
+                '<label>&gt; SELECT: <select id="sel-student">' + opts + "</select></label>" +
+                '<button class="btn" id="edit-student">EDIT</button>' +
+                '<button class="btn btn-red" id="del-student">DELETE</button>' +
+                '</div>' +
+                '<div id="student-form" class="term-form hidden">' +
+                '<div class="frow"><label>&gt; FULL NAME</label><input id="f-name"></div>' +
+                '<div class="frow"><label>&gt; EMAIL</label><input id="f-email" type="email"></div>' +
+                '<div class="frow"><label>&gt; PROGRAM</label><select id="f-program">' + PROGRAMS.map(function (p) { return "<option>" + p + "</option>"; }).join("") + "</select></div>" +
+                '<div class="frow"><label>&gt; YEAR</label><input id="f-year" type="number" value="1" min="1" max="6"></div>' +
+                '<div class="row-actions"><button class="btn" id="save-student">COMMIT</button></div>' +
+                "</div></div>";
+        }
+
+        function viewCourses() {
+            var rows = db.courses.map(function (c) {
+                var n = enrolledCount(c.code);
+                return [c.code, c.title, String(c.credits), String(c.cap), String(n).padStart(2), (n >= c.cap ? "FULL" : Math.round(n / c.cap * 100) + "%"), c.instructor];
+            });
+            var opts = db.courses.map(function (c) { return '<option value="' + c.code + '">' + c.code + " · " + esc(c.title) + "</option>"; }).join("");
+            return '<div class="frame">' + corners() + '<span class="ttl">COURSE CATALOG</span>' +
+                '<div class="toolbar"><span class="sysline">[' + db.courses.length + ' courses · capacity tracked live]</span>' +
+                '<button class="btn" id="add-course">+ NEW COURSE</button></div>' +
+                '<pre class="tbl">' + asciiTable(["CODE", "COURSE TITLE", "CR", "CAP", "EN", "LOAD", "INSTRUCTOR"], rows, [7, 24, 3, 4, 3, 6, 14]) + '</pre>' +
+                '<div class="manage">' +
+                '<label>&gt; SELECT: <select id="sel-course">' + opts + "</select></label>" +
+                '<button class="btn" id="edit-course">EDIT</button>' +
+                '<button class="btn btn-red" id="del-course">DELETE</button>' +
+                '</div>' +
+                '<div id="course-form" class="term-form hidden">' +
+                '<div class="frow"><label>&gt; CODE</label><input id="c-code" placeholder="CS303" style="text-transform:uppercase"></div>' +
+                '<div class="frow"><label>&gt; TITLE</label><input id="c-title"></div>' +
+                '<div class="frow"><label>&gt; CREDITS</label><input id="c-cr" type="number" value="3" min="1" max="12"></div>' +
+                '<div class="frow"><label>&gt; CAPACITY</label><input id="c-cap" type="number" value="30" min="1" max="500"></div>' +
+                '<div class="frow"><label>&gt; INSTRUCTOR</label><input id="c-inst"></div>' +
+                '<div class="row-actions"><button class="btn" id="save-course">COMMIT</button></div>' +
+                "</div></div>";
+        }
+
+        function viewEnroll() {
+            var sopts = db.students.filter(function (s) { return s.status === "active"; }).map(function (s) {
+                return '<option value="' + s.id + '">' + s.id + " · " + esc(s.name) + "</option>";
+            }).join("");
+            var copts = db.courses.map(function (c) { return '<option value="' + c.code + '">' + c.code + " · " + esc(c.title) + "</option>"; }).join("");
+            var rows = db.enrollments.map(function (e) {
+                return ["E-" + String(e.id).padStart(3, "0"), e.studentId, pad(sName(e.studentId), 18), e.courseCode, pad(cTitle(e.courseCode), 20), e.date, e.status, e.grade];
+            });
+            var eopts = db.enrollments.slice().sort(function (a, b) { return b.id - a.id; }).map(function (e) {
+                return '<option value="' + e.id + '">E-' + String(e.id).padStart(3, "0") + " · " + esc(sName(e.studentId)) + " · " + e.courseCode + " · " + e.status + "</option>";
+            }).join("");
+            return '<div class="frame">' + corners() + '<span class="ttl">ENROLLMENT OPERATIONS</span>' +
+                '<div class="term-form">' +
+                '<div class="frow"><label>&gt; STUDENT</label><select id="e-student">' + sopts + "</select></div>" +
+                '<div class="frow"><label>&gt; COURSE</label><select id="e-course">' + copts + "</select></div>" +
+                '<div class="frow"><label>&gt; INFO</label><span id="e-info" class="sysline"></span></div>' +
+                '<div class="row-actions"><button class="btn" id="do-enroll">ENROLL</button></div>' +
+                '</div>' +
+                '<pre class="tbl" style="margin-top:14px">' + asciiTable(["REF", "SID", "STUDENT", "CODE", "COURSE", "DATE", "STATUS", "GR"], rows, [6, 9, 18, 7, 20, 11, 11, 3]) + '</pre>' +
+                '<div class="manage">' +
+                '<label>&gt; SELECT: <select id="sel-enroll">' + eopts + "</select></label>" +
+                '<button class="btn btn-amber" id="complete-enroll">COMPLETE</button>' +
+                '<button class="btn btn-red" id="drop-enroll">DROP</button>' +
+                '<button class="btn btn-red" id="del-enroll">PURGE</button>' +
+                "</div></div>";
+        }
+
+        function viewReports() {
+            var rows = db.courses.map(function (c) {
+                var n = enrolledCount(c.code);
+                return [c.code, pad(c.title, 22), String(n).padStart(2), String(c.cap).padStart(2), bar(n, c.cap, 20), c.instructor];
+            });
+            var counts = {};
+            db.students.forEach(function (s) { counts[s.program] = (counts[s.program] || 0) + 1; });
+            var maxP = Math.max.apply(null, [1].concat(Object.keys(counts).map(function (k) { return counts[k]; })));
+            var dist = Object.keys(counts).map(function (p) { return pad(p, 20) + "│" + bar(counts[p], maxP, 20) + " " + counts[p]; }).join("\n");
+            var stRows = ["ENROLLED", "COMPLETED", "DROPPED"].map(function (st) {
+                return [st, db.enrollments.filter(function (e) { return e.status === st; }).length];
+            });
+            return '<div class="frame">' + corners() + '<span class="ttl">COURSE LOAD REPORT</span>' +
+                '<pre class="tbl">' + asciiTable(["CODE", "COURSE", "EN", "CAP", "", "INSTRUCTOR"], rows, [7, 22, 3, 4, 22, 14]) + '</pre></div>' +
+                '<div class="frame">' + corners() + '<span class="ttl">STATUS BREAKDOWN</span>' +
+                '<pre class="tbl">' + asciiTable(["STATUS", "COUNT"], stRows, [12, 6]) + '</pre></div>' +
+                '<div class="frame">' + corners() + '<span class="ttl">STUDENTS PER PROGRAM</span>' +
+                '<pre class="chart">' + dist + '</pre>' +
+                '<div class="manage">' +
+                '<button class="btn" id="exp-json">EXPORT JSON</button>' +
+                '<button class="btn" id="exp-csv">EXPORT CSV</button>' +
+                '<button class="btn btn-red" id="reset-db">RESET DEMO DATA</button>' +
+                "</div></div>";
+        }
+
+        /* ================= ACTIONS ================= */
+        function doEnroll(sid, code) {
+            var s = db.students.find(function (x) { return x.id === sid; });
+            var c = db.courses.find(function (x) { return x.code === code; });
+            if (!s) return { ok: false, msg: "student not found" };
+            if (!c) return { ok: false, msg: "course not found" };
+            if (s.status !== "active") return { ok: false, msg: "student is inactive" };
+            if (db.enrollments.some(function (e) { return e.studentId === sid && e.courseCode === code && e.status === "ENROLLED"; }))
+                return { ok: false, msg: "duplicate enrollment blocked" };
+            if (enrolledCount(code) >= c.cap) return { ok: false, msg: "course full (" + c.cap + " seats)" };
+            db.enrollments.push({ id: db.seq.e++, studentId: sid, courseCode: code, date: today(), status: "ENROLLED", grade: "-" });
+            save();
+            return { ok: true };
+        }
+        function resetDB() {
+            db = seed(); save();
+            log("demo database restored", "warn");
+            toast("DATABASE RESET", "warn");
+            render();
+        }
+        function download(name, content, type) {
+            try {
+                var a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([content], { type: type }));
+                a.download = name;
+                document.body.appendChild(a); a.click(); a.remove();
+                log("file exported: " + name, "info");
+            } catch (e) { log("export blocked by sandbox: " + name, "err"); }
+        }
+
+        /* ================= AFTER-RENDER WIRING ================= */
+        function afterStudents() {
+            $("#q").addEventListener("input", function () {
+                state.q = this.value; render();
+                var el = $("#q"); el.focus(); el.setSelectionRange(el.value.length, el.value.length);
+            });
+            $("#add-student").onclick = function () { $("#student-form").classList.toggle("hidden"); };
+            $("#save-student").onclick = function () {
+                var name = $("#f-name").value.trim(), email = $("#f-email").value.trim();
+                if (!name || !email) { toast("NAME + EMAIL REQUIRED", "err"); log("commit failed: empty fields", "err"); return; }
+                var id = "S-" + (db.seq.s++);
+                db.students.push({ id: id, name: name, email: email, program: $("#f-program").value, year: +$("#f-year").value || 1, status: "active", joined: today() });
+                save(); log("student " + id + " '" + name + "' added"); toast("STUDENT COMMITTED"); state.q = ""; render();
+            };
+            $("#edit-student").onclick = function () {
+                var id = $("#sel-student").value;
+                var s = db.students.find(function (x) { return x.id === id; });
+                if (!s) return;
+                openModal("EDIT STUDENT " + id, [
+                    { name: "name", label: "FULL NAME" },
+                    { name: "email", label: "EMAIL" },
+                    { name: "program", label: "PROGRAM", type: "select", options: PROGRAMS },
+                    { name: "year", label: "YEAR", type: "number" },
+                    { name: "status", label: "STATUS", type: "select", options: ["active", "inactive"] }
+                ], s, function (d) {
+                    s.name = d.name; s.email = d.email; s.program = d.program; s.year = +d.year || s.year; s.status = d.status;
+                    save(); log("student " + id + " updated"); toast("UPDATED");
+                    $("#modal").classList.add("hidden"); render();
+                });
+            };
+            $("#del-student").onclick = function () {
+                var btn = this, id = $("#sel-student").value;
+                arm(btn, function () {
+                    var n = db.enrollments.filter(function (e) { return e.studentId === id && e.status === "ENROLLED"; }).length;
+                    db.students = db.students.filter(function (x) { return x.id !== id; });
+                    db.enrollments = db.enrollments.filter(function (e) { return e.studentId !== id; });
+                    save(); log("student " + id + " removed (" + n + " enrollment records purged)", "warn");
+                    toast("DELETED", "warn"); render();
+                });
+            };
+        }
+
+        function afterCourses() {
+            $("#add-course").onclick = function () { $("#course-form").classList.toggle("hidden"); };
+            $("#save-course").onclick = function () {
+                var code = $("#c-code").value.trim().toUpperCase(), title = $("#c-title").value.trim();
+                if (!code || !title) { toast("CODE + TITLE REQUIRED", "err"); log("commit failed: empty fields", "err"); return; }
+                if (db.courses.some(function (c) { return c.code === code; })) { toast("CODE ALREADY EXISTS", "err"); log("commit failed: duplicate " + code, "err"); return; }
+                db.courses.push({ code: code, title: title, credits: +$("#c-cr").value || 3, cap: +$("#c-cap").value || 30, instructor: $("#c-inst").value.trim() || "TBA" });
+                save(); log("course " + code + " '" + title + "' added"); toast("COURSE COMMITTED"); render();
+            };
+            $("#edit-course").onclick = function () {
+                var code = $("#sel-course").value;
+                var c = db.courses.find(function (x) { return x.code === code; });
+                if (!c) return;
+                openModal("EDIT COURSE " + code, [
+                    { name: "title", label: "TITLE" },
+                    { name: "credits", label: "CREDITS", type: "number" },
+                    { name: "cap", label: "CAPACITY", type: "number" },
+                    { name: "instructor", label: "INSTRUCTOR" }
+                ], c, function (d) {
+                    var newCap = +d.cap || c.cap;
+                    if (newCap < enrolledCount(code)) { toast("CAP < CURRENT ENROLLMENT", "err"); log("edit rejected: cap below enrollment count", "err"); return; }
+                    c.title = d.title; c.credits = +d.credits || c.credits; c.cap = newCap; c.instructor = d.instructor;
+                    save(); log("course " + code + " updated"); toast("UPDATED");
+                    $("#modal").classList.add("hidden"); render();
+                });
+            };
+            $("#del-course").onclick = function () {
+                var btn = this, code = $("#sel-course").value;
+                arm(btn, function () {
+                    var n = db.enrollments.filter(function (e) { return e.courseCode === code; }).length;
+                    db.courses = db.courses.filter(function (x) { return x.code !== code; });
+                    db.enrollments = db.enrollments.filter(function (e) { return e.courseCode !== code; });
+                    save(); log("course " + code + " removed (" + n + " records purged)", "warn");
+                    toast("DELETED", "warn"); render();
+                });
+            };
+        }
+
+        function afterEnroll() {
+            var info = function () {
+                var c = db.courses.find(function (x) { return x.code === $("#e-course").value; });
+                if (!c) { $("#e-info").textContent = "-- no course --"; return; }
+                var n = enrolledCount(c.code);
+                $("#e-info").textContent = "SEATS " + n + "/" + c.cap + (n >= c.cap ? "  [COURSE FULL]" : "") + " · " + c.credits + " CR · PROF. " + c.instructor;
+            };
+            $("#e-course").addEventListener("change", info);
+            info();
+            $("#do-enroll").onclick = function () {
+                var sid = $("#e-student").value, code = $("#e-course").value;
+                var r = doEnroll(sid, code);
+                if (r.ok) { log("OK: " + sid + " -> " + code); toast("ENROLLED"); render(); }
+                else { log("ENROLL FAIL: " + r.msg, "err"); toast(r.msg.toUpperCase(), "err"); }
+            };
+            $("#complete-enroll").onclick = function () {
+                var e = db.enrollments.find(function (x) { return x.id === +$("#sel-enroll").value; });
+                if (!e) return;
+                openModal("GRADE RECORD E-" + String(e.id).padStart(3, "0"), [
+                    { name: "grade", label: "FINAL GRADE", type: "select", options: ["A", "B", "C", "D", "F"] }
+                ], { grade: "A" }, function (d) {
+                    e.status = "COMPLETED"; e.grade = d.grade;
+                    save(); log("E-" + String(e.id).padStart(3, "0") + " completed, grade " + d.grade);
+                    toast("COMPLETED", "info"); $("#modal").classList.add("hidden"); render();
+                });
+            };
+            $("#drop-enroll").onclick = function () {
+                var btn = this;
+                arm(btn, function () {
+                    var e = db.enrollments.find(function (x) { return x.id === +$("#sel-enroll").value; });
+                    if (!e) return;
+                    e.status = "DROPPED";
+                    save(); log("E-" + String(e.id).padStart(3, "0") + " dropped", "warn");
+                    toast("DROPPED", "warn"); render();
+                });
+            };
+            $("#del-enroll").onclick = function () {
+                var btn = this;
+                arm(btn, function () {
+                    var id = +$("#sel-enroll").value;
+                    db.enrollments = db.enrollments.filter(function (x) { return x.id !== id; });
+                    save(); log("E-" + String(id).padStart(3, "0") + " purged from records", "warn");
+                    toast("PURGED", "warn"); render();
+                });
+            };
+        }
+
+        function afterReports() {
+            $("#exp-json").onclick = function () { download("enrollment_db.json", JSON.stringify(db, null, 2), "application/json"); };
+            $("#exp-csv").onclick = function () {
+                var rows = [["id", "name", "email", "program", "year", "status", "joined"]]
+                    .concat(db.students.map(function (s) { return [s.id, s.name, s.email, s.program, s.year, s.status, s.joined]; }));
+                download("students.csv", rows.map(function (r) { return r.join(","); }).join("\n"), "text/csv");
+            };
+            $("#reset-db").onclick = function () { var b = this; arm(b, resetDB); };
+        }
+
+        /* ================= ROUTER ================= */
+        var state = { view: "dashboard", q: "" };
+        var Views = { dashboard: viewDashboard, students: viewStudents, courses: viewCourses, enroll: viewEnroll, reports: viewReports };
+        var After = { students: afterStudents, courses: afterCourses, enroll: afterEnroll, reports: afterReports };
+
+        function render() {
+            $$("#nav button").forEach(function (b) { b.classList.toggle("active", b.dataset.view === state.view); });
+            $("#main").innerHTML = Views[state.view]();
+            if (After[state.view]) After[state.view]();
+            window.scrollTo(0, 0);
+        }
+
+        /* ================= CLI ================= */
+        function cliExec(raw) {
+            var line = raw.trim(); if (!line) return;
+            log("root@enroll:~$ " + line, "info");
+            var parts = line.split(/\s+/);
+            var cmd = parts[0].toLowerCase();
+            var args = parts.slice(1);
+            switch (cmd) {
+                case "help":
+                    log("  stats ........................ summary");
+                    log("  students | courses | enrollments . print tables");
+                    log("  enroll <SID> <CODE> .......... register student");
+                    log("  drop <EID> ................... drop enrollment");
+                    log("  complete <EID> <GRADE> ....... grade and close");
+                    log("  who <CODE> ................... course roster");
+                    log("  find <query> ................. search students");
+                    log("  goto <module> ................ dashboard|students|courses|enroll|reports");
+                    log("  export json .................. download database");
+                    log("  reset ........................ restore demo data");
+                    log("  clear ........................ wipe console");
+                    break;
+                case "clear": $("#log").innerHTML = ""; break;
+                case "stats": {
+                    var act = db.enrollments.filter(function (e) { return e.status === "ENROLLED"; }).length;
+                    var cap = db.courses.reduce(function (a, c) { return a + c.cap; }, 0);
+                    log("students=" + db.students.length + "  courses=" + db.courses.length + "  active=" + act + "  capacity=" + cap + " (" + Math.round(act / cap * 100) + "%)");
+                    break;
+                }
+                case "students":
+                    log("\n" + asciiTable(["ID", "NAME", "EMAIL", "PROGRAM", "YR", "STATUS"],
+                        db.students.map(function (s) { return [s.id, s.name, s.email, s.program, "Y" + s.year, s.status.toUpperCase()]; }), [8, 22, 28, 20, 3, 9]));
+                    break;
+                case "courses":
+                    log("\n" + asciiTable(["CODE", "COURSE", "CR", "CAP", "EN", "INSTRUCTOR"],
+                        db.courses.map(function (c) { return [c.code, c.title, String(c.credits), String(c.cap), String(enrolledCount(c.code)), c.instructor]; }), [7, 24, 3, 4, 3, 14]));
+                    break;
+                case "enrollments":
+                    log("\n" + asciiTable(["REF", "SID", "STUDENT", "CODE", "DATE", "STATUS", "GR"],
+                        db.enrollments.map(function (e) { return ["E-" + String(e.id).padStart(3, "0"), e.studentId, pad(sName(e.studentId), 18), e.courseCode, e.date, e.status, e.grade]; }), [6, 9, 18, 7, 11, 11, 3]));
+                    break;
+                case "enroll": {
+                    if (args.length < 2) { log("usage: enroll <SID> <CODE>", "err"); break; }
+                    var r = doEnroll(args[0].toUpperCase(), args[1].toUpperCase());
+                    if (r.ok) { log("OK: " + args[0].toUpperCase() + " -> " + args[1].toUpperCase()); toast("ENROLLED"); render(); }
+                    else log("FAIL: " + r.msg, "err");
+                    break;
+                }
+                case "drop": {
+                    var e1 = db.enrollments.find(function (x) { return x.id === parseInt(args[0], 10); });
+                    if (!e1) { log("enrollment not found", "err"); break; }
+                    e1.status = "DROPPED"; save();
+                    log("E-" + String(e1.id).padStart(3, "0") + " dropped"); render();
+                    break;
+                }
+                case "complete": {
+                    var e2 = db.enrollments.find(function (x) { return x.id === parseInt(args[0], 10); });
+                    if (!e2) { log("enrollment not found", "err"); break; }
+                    e2.status = "COMPLETED"; e2.grade = (args[1] || "A").toUpperCase(); save();
+                    log("E-" + String(e2.id).padStart(3, "0") + " completed, grade " + e2.grade); render();
+                    break;
+                }
+                case "who": {
+                    var code = (args[0] || "").toUpperCase();
+                    var list = db.enrollments.filter(function (e) { return e.courseCode === code && e.status === "ENROLLED"; });
+                    if (!list.length) { log("no active students in " + code, "warn"); break; }
+                    log("\n" + asciiTable(["SID", "STUDENT", "DATE"], list.map(function (e) { return [e.studentId, sName(e.studentId), e.date]; }), [9, 26, 11]));
+                    break;
+                }
+                case "find": {
+                    var q = args.join(" ").toLowerCase();
+                    var hits = db.students.filter(function (s) { return [s.id, s.name, s.email, s.program].join(" ").toLowerCase().indexOf(q) > -1; });
+                    log("\n" + asciiTable(["ID", "NAME", "EMAIL", "PROGRAM", "YR"], hits.map(function (s) { return [s.id, s.name, s.email, s.program, "Y" + s.year]; }), [8, 22, 28, 20, 3]));
+                    break;
+                }
+                case "goto": {
+                    var v = (args[0] || "").toLowerCase();
+                    if (Views[v]) { state.view = v; render(); log("module -> " + v); }
+                    else log("unknown module: " + v, "err");
+                    break;
+                }
+                case "export":
+                    if ((args[0] || "").toLowerCase() === "json") { download("enrollment_db.json", JSON.stringify(db, null, 2), "application/json"); }
+                    else log("usage: export json", "err");
+                    break;
+                case "reset": resetDB(); break;
+                default: log("unknown command '" + cmd + "' -- type 'help'", "err");
+            }
+        }
+
+        /* ================= BOOT ================= */
+        function boot() {
+            var lines = [
+                "ENROLL.EXE BIOS v2.4 -- (c) 2026 ASCII SYSTEMS LTD.",
+                "MEMORY CHECK ............ 640K OK",
+                "MOUNT /var/students ..... OK (" + db.students.length + " records)",
+                "MOUNT /var/courses ...... OK (" + db.courses.length + " records)",
+                "MOUNT /var/enrollments .. OK (" + db.enrollments.length + " records)",
+                "NETWORK ................. OFFLINE (local-storage mode)",
+                "READY. keys 1-5 switch modules, '/' focuses console. type 'help'."
+            ];
+            lines.forEach(function (l, i) { setTimeout(function () { log(l, "info"); }, 120 * i + 100); });
+        }
+        function startClock() {
+            var f = function () { $("#clock").textContent = new Date().toLocaleString() + " // TERM: FALL 2026"; };
+            f(); setInterval(f, 1000);
+        }
+
+        /* ================= INIT ================= */
+        load();
+        startClock();
+        $$("#nav button").forEach(function (b) {
+            b.onclick = function () { state.view = b.dataset.view; state.q = ""; render(); };
+        });
+        $("#cli").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { var v = e.target.value; e.target.value = ""; cliExec(v); }
+        });
+        $("#modal-save").onclick = function () {
+            var d = {};
+            $$("#modal-body [name]").forEach(function (el) { d[el.name] = el.value.trim(); });
+            if (modalSave) modalSave(d);
+        };
+        $("#modal-cancel").onclick = function () { $("#modal").classList.add("hidden"); };
+        $("#modal").addEventListener("click", function (e) { if (e.target === $("#modal")) $("#modal").classList.add("hidden"); });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") { $("#modal").classList.add("hidden"); return; }
+            var ae = document.activeElement;
+            var typing = ae && (ae.tagName === "INPUT" || ae.tagName === "SELECT" || ae.tagName === "TEXTAREA");
+            if (typing) return;
+            var map = { "1": "dashboard", "2": "students", "3": "courses", "4": "enroll", "5": "reports" };
+            if (map[e.key]) { state.view = map[e.key]; state.q = ""; render(); }
+            if (e.key === "/") { e.preventDefault(); $("#cli").focus(); }
+        });
+        render();
+        boot();
+    </script>
+</body>
+
+</html>
